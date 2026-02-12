@@ -1,0 +1,30 @@
+body { font-family: 'Roboto', sans-serif; background: linear-gradient(135deg, #f0fff0, #fffde7); margin: 0; padding: 0; }
+h2 { text-align: center; color: #2e7d32; margin-top: 30px; font-weight: 700; letter-spacing: 1px; }
+form, #loginForm { background: rgba(255,255,255,0.85); padding:25px; border-radius:20px; box-shadow:0 12px 25px rgba(0,0,0,0.15); display:flex; flex-wrap:wrap; gap:15px; justify-content:space-between; margin:20px auto; max-width:950px; backdrop-filter: blur(12px); transition: transform 0.3s; }
+form:hover, #loginForm:hover { transform: translateY(-3px); }
+input, select, button { padding:12px 15px; border-radius:12px; border:1px solid #a5d6a7; font-size:14px; transition:0.3s; }
+input:focus, select:focus { outline:none; border-color:#66bb6a; box-shadow:0 0 8px rgba(102,187,106,0.4); }
+button { background:#66bb6a; color:white; border:none; cursor:pointer; font-weight:500; transition:0.3s; }
+button:hover { background:#2e7d32; }
+label { width:100%; font-weight:500; color:#33691e; margin-top:5px; font-size:13px; }
+#dispatchTable { width:95%; margin:25px auto; border-collapse:collapse; background: rgba(255,255,255,0.85); border-radius:20px; overflow:hidden; box-shadow:0 12px 25px rgba(0,0,0,0.1); backdrop-filter:blur(10px); }
+th, td { padding:12px; text-align:left; border-bottom:1px solid #c5e1a5; font-size:13px; color:#33691e; }
+th { background:#aed581; color:#1b5e20; font-weight:600; }
+tr:hover { background: rgba(205,220,57,0.2); }
+button.actionBtn { background:#9ccc65; margin-right:5px; font-size:12px; padding:5px 10px; }
+button.actionBtn.delete { background:#ef5350; }
+button.actionBtn:hover { opacity:0.9; }
+.delayed { color:red; font-weight:bold; }
+#app p { text-align:center; font-weight:500; color:#2e7d32; }
+#app p button { background:#33691e; padding:5px 10px; margin-left:10px; border-radius:8px; }
+#app p button:hover { background:#66bb6a; }
+.password-container { position: relative; width: 100%; }
+.password-container input[type="password"] { width: 100%; padding-right:40px; }
+.password-container .toggle-password { position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:14px; color:#33691e; user-select:none; }
+#filters { display:flex; gap:10px; margin:15px auto; max-width:950px; justify-content:flex-end; }
+#filters select { width:200px; }
+
+
+
+
+

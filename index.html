@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LSDispatch Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Header with live time -->
+<h2>LS Dispatch Tracker</h2>
+<div style="text-align:center; margin-bottom:15px; font-size:18px; font-weight:bold;">
+  Live Time: <span id="liveTime"></span>
+</div>
+
+<!-- A G C N LOGIN -->
+<form id="loginForm">
+  <input type="text" id="username" placeholder="Username" required>
+  <div class="password-container">
+    <input type="password" id="password" placeholder="Password" required>
+    <span class="toggle-password" onclick="togglePassword()">👁️</span>
+  </div>
+  <button type="submit">Login</button>
+</form>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none;">
+  <p>Logged in as: <span id="currentUser"></span> (<span id="role"></span>) 
+    <button onclick="logout()">Logout</button>
+  </p>
+
+  <!-- Admin Only Clear All Button -->
+  <div id="adminControls" style="text-align:center; margin-bottom:15px; display:none;">
+    <button onclick="clearAllData()">Admin: Clear All Records</button>
+  </div>
+
+  <!-- A G C N Filters -->
+  <div id="filters" style="display:none;">
+    <select id="filterDept">
+      <option value="">All Departments</option>
+      <option value="SPORTS">SPORTS</option>
+      <option value="Racing UK">Racing UK</option>
+      <option value="Racing AUS">Racing AUS</option>
+    </select>
+    <select id="filterSection">
+      <option value="">All Sections</option>
+      <option value="1st Section">1st Section Sport Publication</option>
+      <option value="2nd Section">2nd Section Sport Publication</option>
+      <option value="1st Section UK">1st Section UK Publication</option>
+      <option value="2nd Section UK">2nd Section UK Publication</option>
+      <option value="1st Section RST UK">1st Section RST UK Publication</option>
+      <option value="2nd Section RST UK">2nd Section RST UK Publication</option>
+      <option value="AUS Publication">AUS Publication</option>
+      <option value="AUS RST">AUS RST Publication</option>
+    </select>
+    <button onclick="applyFilter()">Filter</button>
+    <button onclick="clearFilter()">Clear Filter</button>
+  </div>
+
+  <form id="dispatchForm">
+    <input type="date" id="date" required>
+    <select id="department" required>
+      <option value="">Select Department</option>
+      <option value="SPORTS">SPORTS</option>
+      <option value="Racing UK">Racing UK</option>
+      <option value="Racing AUS">Racing AUS</option>
+    </select>
+    <select id="section">
+      <option value="">Select Section</option>
+      <option value="1st Section" data-department="SPORTS">1st Section Sport Publication</option>
+      <option value="2nd Section" data-department="SPORTS">2nd Section Sport Publication</option>
+      <option value="1st Section UK" data-department="Racing UK">1st Section UK Publication</option>
+      <option value="2nd Section UK" data-department="Racing UK">2nd Section UK Publication</option>
+      <option value="1st Section RST UK" data-department="Racing UK">1st Section RST UK Publication</option>
+      <option value="2nd Section RST UK" data-department="Racing UK">2nd Section RST UK Publication</option>
+      <option value="AUS Publication" data-department="Racing AUS">AUS Publication</option>
+      <option value="AUS RST" data-department="Racing AUS">AUS RST Publication</option>
+    </select>
+
+    <label for="pageCTP">Page CTP</label>
+    <input type="time" id="pageCTP" placeholder="Page CTP">
+
+    <label for="dispatchReceived">Dispatch Received</label>
+    <input type="time" id="dispatchReceived" placeholder="Dispatch Received">
+
+    <label for="departure">Departure</label>
+    <input type="time" id="departure" placeholder="Departure">
+
+    <input type="text" id="notes" placeholder="Notes">
+
+    <label style="display:flex; align-items:center; gap:5px;">
+      <input type="checkbox" id="departureAll"> Departure All
+    </label>
+
+    <button type="submit">Add Record</button>
+    <button type="button" id="exportExcel">Export Excel</button>
+  </form>
+
+  <table id="dispatchTable">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Department</th>
+        <th>Section</th>
+        <th>Page CTP</th>
+        <th>Dispatch Received</th>
+        <th>Departure</th>
+        <th>Notes</th>
+        <th>Deadline (CTP)</th>
+        <th>Deadline (Dispatch)</th>
+        <th>Deadline (Departure)</th>
+        <th>Delay (CTP)</th>
+        <th>Delay (Dispatch)</th>
+        <th>Delay (Departure)</th>
+        <th>User</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<!-- A G C N Firebase Compat CDN -->
+<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script src="script.js"></script>
+
+<!-- Live Time Script -->
+<script>
+function updateLiveTime() {
+  const now = new Date();
+  const hours = now.getHours();
+  const minutes = now.getMinutes().toString().padStart(2, '0');
+  const seconds = now.getSeconds().toString().padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const displayHour = (hours % 12) || 12;
+  const liveTimeElem = document.getElementById('liveTime');
+  if(liveTimeElem) {
+    liveTimeElem.textContent = `${displayHour.toString().padStart(2,'0')}:${minutes}:${seconds} ${ampm}`;
+  }
+}
+setInterval(updateLiveTime, 1000);
+updateLiveTime();
+</script>
+
+</body>
+</html>
+
