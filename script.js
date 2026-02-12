@@ -1,17 +1,47 @@
-// A G C N Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyDxE1d9nCYUTjmipUJ3zPSvtaFwypkk0bI",
-  authDomain: "dispatchwebapp-66959.firebaseapp.com",
-  databaseURL: "https://dispatchwebapp-66959-default-rtdb.firebaseio.com/",
-  projectId: "dispatchwebapp-66959",
-  storageBucket: "dispatchwebapp-66959.appspot.com",
-  messagingSenderId: "984217204226",
-  appId: "1:984217204226:web:ab6efa24a54345fc57d91b",
-  measurementId: "G-4N950SN8V9"
+// A G C N Storage Configuration (Replacing Firebase)
+const STORAGE_KEY = "ls_dispatch_records";
+
+// Helper to simulate Database behavior
+const db = {
+  ref: function() {
+    return {
+      on: (event, callback) => {
+        const data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+        callback({ val: () => data });
+      },
+      push: () => {
+        const newKey = 'rec_' + Date.now();
+        return { key: newKey };
+      },
+      set: (path, data) => {
+        const allData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+        const key = path.split('/').pop();
+        allData[key] = data;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(allData));
+        refreshData();
+      },
+      remove: (path) => {
+        if (!path || path === "dispatchRecords") {
+          localStorage.removeItem(STORAGE_KEY);
+        } else {
+          const allData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+          const key = path.split('/').pop();
+          delete allData[key];
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(allData));
+        }
+        refreshData();
+      }
+    };
+  }
 };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+function refreshData() {
+  db.ref().on("value", snapshot => {
+    const data = snapshot.val();
+    records = data ? Object.keys(data).map(key => ({ ...data[key], key })) : [];
+    renderTable();
+  });
+}
 
 const users = {
   "admin": { password: "admin123", role: "admin" },
@@ -43,12 +73,8 @@ let currentUser = null;
 let records = [];
 let filteredRecords = [];
 
-// A G C N Load records from Firebase
-db.ref("dispatchRecords").on("value", snapshot => {
-  const data = snapshot.val();
-  records = data ? Object.keys(data).map(key => ({ ...data[key], key })) : [];
-  renderTable();
-});
+// Initial Load
+refreshData();
 
 // ---------- A G C N LOGIN ----------
 document.getElementById("loginForm").addEventListener("submit", function(e){
@@ -114,7 +140,7 @@ document.getElementById("dispatchForm").addEventListener("submit", function(e){
           const dlDept = deadlines[r.department] && deadlines[r.department][r.section] ? deadlines[r.department][r.section] : {};
           r.deadlineDeparture = dlDept.departure || "";
           r.delayDeparture = isDelayed(r.departure, r.deadlineDeparture, r.date);
-          db.ref("dispatchRecords/" + r.key).set(r);
+          db.ref().set("dispatchRecords/" + r.key, r);
         }
       }
     });
@@ -144,7 +170,7 @@ document.getElementById("dispatchForm").addEventListener("submit", function(e){
       existing.delayDispatch = isDelayed(existing.dispatchReceived, dl.dispatch, date);
       existing.delayDeparture = isDelayed(existing.departure, dl.departure, date);
 
-      db.ref("dispatchRecords/" + existing.key).set(existing);
+      db.ref().set("dispatchRecords/" + existing.key, existing);
 
     } else {
       const newRecord = {
@@ -165,9 +191,9 @@ document.getElementById("dispatchForm").addEventListener("submit", function(e){
         dispatchBy: dispatch ? currentUser.username : "",
         departureBy: departure ? currentUser.username : ""
       };
-      const newKey = db.ref("dispatchRecords").push().key;
+      const newKey = db.ref().push().key;
       newRecord.key = newKey;
-      db.ref("dispatchRecords/" + newKey).set(newRecord);
+      db.ref().set("dispatchRecords/" + newKey, newRecord);
     }
   }
   this.reset();
@@ -181,7 +207,6 @@ function renderTable(){
   data.forEach((rec, idx) => {
     const tr = document.createElement("tr");
 
-    // Time normal color for users, blue name for admins
     const pageCTPDisplay = rec.pageCTP 
       ? (currentUser.role === "admin" 
           ? `${rec.pageCTP} <span style="color:blue">(${rec.ctpBy || ""})</span>` 
@@ -252,20 +277,18 @@ function editRecord(index){
 function deleteRecord(index){
   if(confirm("Delete this record?")){
     const rec = records[index];
-    db.ref("dispatchRecords/" + rec.key).remove();
+    db.ref().remove("dispatchRecords/" + rec.key);
   }
 }
 
 function clearAllData(){
   if(confirm("Are you sure you want to clear ALL records?")){
-    db.ref("dispatchRecords").remove();
+    db.ref().remove("dispatchRecords");
   }
 }
 
 document.getElementById("exportExcel").addEventListener("click", function(){
-  // Grab the HTML table
   const table = document.getElementById("dispatchTable");
-  // Convert table to a worksheet
   const ws = XLSX.utils.table_to_sheet(table, {raw: true});
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Dispatch");
@@ -294,4 +317,3 @@ function clearFilter(){
   filteredRecords = [];
   renderTable();
 }
-
